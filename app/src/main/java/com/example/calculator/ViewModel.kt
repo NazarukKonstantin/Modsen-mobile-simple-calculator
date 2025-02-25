@@ -32,18 +32,18 @@ class ViewModel : ViewModel() {
 
     private fun findPercentage() {
         if (state.operation == null &&
-            state.number1.displayedValue.last() != '.' &&
-            !state.number1.displayedValue.contains('%') &&
-            state.number1.displayedValue.isNotBlank()
+            state.number1.toString().last() != '.' &&
+            !state.number1.toString().contains('%') &&
+            state.number1.toString().isNotBlank()
         ) {
             state = state.copy(
                 number1 = state.number1.addPercent()
             )
             return
         }
-        if (state.number2.displayedValue.last() != '.' &&
-            !state.number2.displayedValue.contains('%') &&
-            state.number2.displayedValue.isNotBlank()
+        if (state.number2.toString().last() != '.' &&
+            !state.number2.toString().contains('%') &&
+            state.number2.toString().isNotBlank()
         ) {
             state = state.copy(
                 number2 = state.number2.addPercent()
@@ -53,14 +53,14 @@ class ViewModel : ViewModel() {
 
     private fun changeSign() {
         if (state.operation == null &&
-            state.number1.displayedValue.isNotBlank()
+            state.number1.toString().isNotBlank()
         ) {
             state = state.copy(
                 number1 = state.number1.changeSign()
             )
             return
         }
-        if (state.number2.displayedValue.isNotBlank()
+        if (state.number2.toString().isNotBlank()
         ) {
             state = state.copy(
                 number2 = state.number2.changeSign()
@@ -70,7 +70,7 @@ class ViewModel : ViewModel() {
 
     private fun performDeletion() {
         when {
-            state.number2.displayedValue.isNotBlank() -> {
+            state.number2.toString().isNotBlank() -> {
                 state = state.copy(
                     number2 = state.number2.deleteLastCharacter()
                 )
@@ -80,7 +80,7 @@ class ViewModel : ViewModel() {
                 operation = null
             )
 
-            state.number1.displayedValue.isNotBlank() ->
+            state.number1.toString().isNotBlank() ->
                 state = state.copy(
                     number1 = state.number1.deleteLastCharacter()
                 )
@@ -90,6 +90,13 @@ class ViewModel : ViewModel() {
     private fun performCalculation() {
         val number1 = state.number1.realValue.toDoubleOrNull()
         val number2 = state.number2.realValue.toDoubleOrNull()
+        if (state.number1.displayedValue.last() == '%' && state.operation == null) {
+            defineResultDisplay(
+                state.number1.realValue
+                    .take(15)
+                    .removeSuffix(".0")
+            )
+        }
         if (number1 != null && number2 != null) {
             val operationResult = when (state.operation) {
                 Operation.Add -> number1 + number2
@@ -102,34 +109,37 @@ class ViewModel : ViewModel() {
                 .toString()
                 .take(15)
                 .removeSuffix(".0")
-            state = if (state.isCalculationRequested) {
-                state.copy(
-                    number1 = Number(resultString, resultString),
-                    number2 = Number(),
-                    operation = null,
-                    result = "",
-                    isCalculationRequested = false
-                )
-            } else {
-                state.copy(
-                    result = resultString
-                )
-            }
+            defineResultDisplay(resultString)
         }
+    }
 
+    private fun defineResultDisplay(resultString: String) {
+        state = if (state.isCalculationRequested) {
+            state.copy(
+                number1 = Number(resultString, resultString),
+                number2 = Number(),
+                operation = null,
+                result = "",
+                isCalculationRequested = false
+            )
+        } else {
+            state.copy(
+                result = resultString
+            )
+        }
     }
 
     private fun enterOperation(operation: Operation) {
-        if (state.number1.displayedValue.isNotBlank()) {
+        if (state.number1.toString().isNotBlank()) {
             state = state.copy(operation = operation)
         }
     }
 
     private fun enterDecimal() {
         if (state.operation == null &&
-            !state.number1.displayedValue.contains(".") &&
-            !state.number1.displayedValue.contains('%') &&
-            state.number1.displayedValue.isNotBlank()
+            !state.number1.toString().contains(".") &&
+            !state.number1.toString().contains('%') &&
+            state.number1.toString().isNotBlank()
         ) {
 
             state = state.copy(
@@ -137,9 +147,9 @@ class ViewModel : ViewModel() {
             )
             return
         }
-        if (!state.number2.displayedValue.contains(".") &&
-            !state.number2.displayedValue.contains('%') &&
-            state.number2.displayedValue.isNotBlank()
+        if (!state.number2.toString().contains(".") &&
+            !state.number2.toString().contains('%') &&
+            state.number2.toString().isNotBlank()
         ) {
             state = state.copy(
                 number2 = state.number2.addDecimal()
@@ -149,25 +159,19 @@ class ViewModel : ViewModel() {
 
     private fun enterNumber(number: Int) {
         if (state.operation == null) {
-            if (state.number1.displayedValue.length >= MAX_NUM_LENGTH) {
+            if (state.number1.toString().length >= MAX_NUM_LENGTH) {
                 return
             }
             state = state.copy(
-                number1 = Number(
-                    state.number1.displayedValue + number,
-                    state.number1.realValue + number
-                )
+                number1 = state.number1.appendDigit(number)
             )
             return
         }
-        if (state.number2.displayedValue.length >= MAX_NUM_LENGTH) {
+        if (state.number2.toString().length >= MAX_NUM_LENGTH) {
             return
         }
         state = state.copy(
-            number2 = Number(
-                state.number2.displayedValue + number,
-                state.number2.realValue + number
-            )
+            number2 = state.number2.appendDigit(number)
         )
     }
 

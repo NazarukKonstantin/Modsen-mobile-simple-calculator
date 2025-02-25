@@ -1,10 +1,18 @@
 package com.example.calculator
 
-open class Number(displayedValue: String = "", realValue: String = "") {
-    val displayedValue: String = ""
+open class Number(
+    val displayedValue: String = "",
     val realValue: String = ""
+) {
     override fun toString(): String {
-        return displayedValue
+        return this.displayedValue
+    }
+
+    fun appendDigit(newNum: Int): Number {
+        return Number(
+            (this.displayedValue + newNum),
+            (this.realValue + newNum)
+        )
     }
 
     fun deleteLastCharacter(): Number {

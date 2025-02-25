@@ -60,7 +60,9 @@ fun CalculatorUI(
 //                    lineHeight = 80.sp
 //                )
                 AutoResizableText(
-                    text = state.number1.displayedValue + (state.operation?.symbol ?: "") + state.number2.displayedValue,
+                    text = state.number1.toString() +
+                            (state.operation?.symbol ?: "") +
+                            state.number2.toString(),
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .height(160.dp)
@@ -80,7 +82,7 @@ fun CalculatorUI(
                     color = TextGrey,
                     lineHeight = 70.sp
                 )
-                if (state.number2.displayedValue.isNotEmpty()) {
+                if (state.number2.toString().isNotEmpty()) {
                     onAction(Action.CalculateTemporalResult)
                 }
             }
